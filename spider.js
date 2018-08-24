@@ -2,6 +2,8 @@ var http = require('http');
 var fs = require('fs');
 var cheerio = require('cheerio');
 var request = require('request');
+var userAgents = require('./userAgent')
+
 var i = 0;
 var url = "https://www.javascriptcn.com/thread-2.html";
 // var url = "http://dytt8.net/";
@@ -15,7 +17,13 @@ function startRequest(x) {
     //采用http模块向服务器发起一次get请求
     console.log('==>spider started')
 
-    request.get(x, function (err, res, body) {
+    let userAgent = userAgents[parseInt(Math.random() * userAgents.length)]
+
+    let options = {
+        'User-Agent':userAgent
+    }
+
+    request.get(x,options, function (err, res, body) {
 
         res.setEncoding('utf-8'); //防止中文乱码
         var $ = cheerio.load(body)
@@ -41,12 +49,10 @@ function startRequest(x) {
         if (nextPage) {
             setTimeout(() => {
                 
+                startRequest(nextPage);
             }, Math.random()*5000);
-            startRequest(nextPage);
         } 
 
-    }).on('error', function (err) {
-        console.log(err);
     });
 
 }
