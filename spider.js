@@ -30,21 +30,52 @@ function startRequest(x) {
             data.push(item)
         })
         let dataStr = JSON.stringify(data);
-        console.log(dataStr);
+        // console.log(dataStr);
 
         savedContent(data);
         savedImg(data);
+
+        let nextPage = getNextPage(x)
+        if (nextPage) {
+            startRequest(nextPage);
+        } 
 
     }).on('error', function (err) {
         console.log(err);
     });
 
 }
+
+var pageIdx = 1;
+function getNextPage(x) {
+
+    pageIdx++;
+
+    if (x.indexOf('?')==-1) {
+        return x+"?page=2";
+    } else {
+        // var LastLetter = 	x.substr(x.length-1,1)
+        // var page = parseInt(LastLetter)+1;
+
+        var page = pageIdx;
+        console.log('page::'+page)
+        if (page > 15) {
+            return null;
+        }
+        return url+"?page="+page.toString();
+    }
+}
+
+var idx = 0;
+
 //该函数的作用：在本地存储所爬取的新闻内容资源
 function savedContent(datas) {
     
     datas.forEach(element => {
-        var itemStr = element.title + '\n' + element.img + '\n';
+
+        idx++;
+
+        var itemStr =idx +"::"+ element.title + '\n' + element.img + '\n';
         fs.appendFile('./data/address.txt', itemStr, 'utf8', function (err) {
             if (err) {
                 console.log(err);
