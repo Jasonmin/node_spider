@@ -35,8 +35,13 @@ function startRequest(x) {
         savedContent(data);
         savedImg(data);
 
+        
+
         let nextPage = getNextPage(x)
         if (nextPage) {
+            setTimeout(() => {
+                
+            }, Math.random()*5000);
             startRequest(nextPage);
         } 
 
@@ -58,10 +63,10 @@ function getNextPage(x) {
         // var page = parseInt(LastLetter)+1;
 
         var page = pageIdx;
-        console.log('page::'+page)
         if (page > 15) {
             return null;
         }
+        console.log('page::'+page)
         return url+"?page="+page.toString();
     }
 }
