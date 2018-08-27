@@ -3,15 +3,48 @@ var fs = require('fs');
 var cheerio = require('cheerio');
 var request = require('request');
 var userAgents = require('./userAgent')
+var MongoClient = require('mongodb').MongoClient;
+// var dbURL = 'mongodb:/localhost:27017/runoob'
+var dbURL = "mongodb://localhost:27017/runoob";
 
 var i = 0;
 var url = "https://www.javascriptcn.com/thread-2.html";
-// var url = "http://dytt8.net/";
+
+
 
 function fetchPage(x) {     //封装了一层函数
-    startRequest(x);
+
+    // MongoClient.connect(dbURL, function (err, db) {
+    //     if (err) throw err;
+
+    //     var dbase = db.db('spider')
+    //     dbase.createCollection('jsbook', function (err, res) {
+    //         if (err) throw err
+    //         console.log('创建集合')
+
+    //         db.close();
+    //     })
+    // });
+
+    // startRequest(x);
+
+    queryData();
 }
 
+
+function queryData() {
+    MongoClient.connect(dbURL, function(err, db) {
+        if (err) throw err;
+        
+        var dbase = db.db('spider');
+        dbase.collection('jsbook').find({}).toArray(function(err,res) {
+            if (err) throw err;
+    
+            console.log(res)
+            db.close();
+        })
+    });
+}
 
 function startRequest(x) {
     //采用http模块向服务器发起一次get请求
@@ -20,10 +53,10 @@ function startRequest(x) {
     let userAgent = userAgents[parseInt(Math.random() * userAgents.length)]
 
     let options = {
-        'User-Agent':userAgent
+        'User-Agent': userAgent
     }
 
-    request.get(x,options, function (err, res, body) {
+    request.get(x, options, function (err, res, body) {
 
         res.setEncoding('utf-8'); //防止中文乱码
         var $ = cheerio.load(body)
@@ -37,22 +70,37 @@ function startRequest(x) {
             }
             data.push(item)
         })
-        let dataStr = JSON.stringify(data);
+
+        MongoClient.connect(dbURL, function (err, db) {
+            if (err) throw err;
+            var dbase = db.db('spider');
+
+            if (data.length == 0) {
+                return;
+            }
+
+            var myobj = data;
+
+            dbase.collection('jsbook').insertMany(myobj, function (err, res) {
+                if (err) throw err;
+                console.log('多条文档插入成功')
+                db.close();
+            })
+        });
+
+        // let dataStr = JSON.stringify(data);
         // console.log(dataStr);
 
-        savedContent(data);
-        savedImg(data);
-
-        
+        // savedContent(data);
+        // savedImg(data);
 
         let nextPage = getNextPage(x)
         if (nextPage) {
             setTimeout(() => {
-                
-                startRequest(nextPage);
-            }, Math.random()*5000);
-        } 
 
+                startRequest(nextPage);
+            }, Math.random() * 5000);
+        }
     });
 
 }
@@ -62,18 +110,16 @@ function getNextPage(x) {
 
     pageIdx++;
 
-    if (x.indexOf('?')==-1) {
-        return x+"?page=2";
+    if (x.indexOf('?') == -1) {
+        return x + "?page=2";
     } else {
-        // var LastLetter = 	x.substr(x.length-1,1)
-        // var page = parseInt(LastLetter)+1;
 
         var page = pageIdx;
         if (page > 15) {
             return null;
         }
-        console.log('page::'+page)
-        return url+"?page="+page.toString();
+        console.log('page::' + page)
+        return url + "?page=" + page.toString();
     }
 }
 
@@ -81,12 +127,12 @@ var idx = 0;
 
 //该函数的作用：在本地存储所爬取的新闻内容资源
 function savedContent(datas) {
-    
+
     datas.forEach(element => {
 
         idx++;
 
-        var itemStr =idx +"::"+ element.title + '\n' + element.img + '\n';
+        var itemStr = idx + "::" + element.title + '\n' + element.img + '\n';
         fs.appendFile('./data/address.txt', itemStr, 'utf8', function (err) {
             if (err) {
                 console.log(err);
@@ -108,7 +154,7 @@ function savedImg(datas) {
             }
         });
 
-        var writeStream = fs.createWriteStream('./image/'+ele.title+'.jpg');
+        var writeStream = fs.createWriteStream('./image/' + ele.title + '.jpg');
         request(src).pipe(writeStream);
     })
 }
