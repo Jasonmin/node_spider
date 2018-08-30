@@ -8,7 +8,13 @@ async function excuteAsyncTask() {
     console.log(valueA)
     const valueB = await B();
     console.log(valueB)
-    await sleep(1000);
+    try {
+        console.log('start sleep')
+        await sleep(1000);
+        console.log('end sleep')
+    } catch (error) {
+        console.log(error)
+    }
     const valueC = await C();
     console.log(valueC)
 }
@@ -44,7 +50,8 @@ function B(err, data) {
 function sleep(time) {
     return new Promise( function (resolve, reject) {
         setTimeout(() => {
-            resolve('OK');
+            // resolve('OK');
+            reject('reject err');
         }, time);
     })
 }
