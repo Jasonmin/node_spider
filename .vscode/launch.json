@@ -6,11 +6,12 @@
     "configurations": [
 
 
+
         {
             "type": "node",
             "request": "launch",
             "name": "启动程序",
-            "program": "${workspaceFolder}/template/bookSpider.js"
+            "program": "${workspaceFolder}/crawler/imooc/index.js"
         }
     ]
 }

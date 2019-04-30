@@ -8,6 +8,31 @@ var pool = mysql.createPool({
     database : 'users'
 });
 
+exports.bookSave = function(list,callback){
+    
+    pool.getConnection(function(err,connection){
+        if(err){
+            return callback(err);
+        }
+        var findsql = 'select * from mm_book where id=?';
+        var updatesql = 'update video set title=?,imgPath=?,linkUrl=? where id=?';
+        var insertsql = 'insert into mm_book(id,title,imgPath,linkUrl) values(?,?,?,?)';
+        async.eachSeries(list,function(item,next){
+        connection.query(findsql,[item.id],function(err,result){
+            if(err){
+                return next(err);
+            }
+            if(result.length>=1){
+                connection.query(updatesql,[item.title,item.url,item.name,item.duration,item.id],next);
+            }else{
+                connection.query(insertsql,[item.id,item.title,item.imgPath,item.linkUrl],next);
+            }
+        });         
+        },callback);
+        connection.release();
+    });
+};
+
 exports.videoSave = function(list,callback){
     
     pool.getConnection(function(err,connection){
