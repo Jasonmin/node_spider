@@ -7,11 +7,12 @@
 
 
 
+
         {
             "type": "node",
             "request": "launch",
             "name": "启动程序",
-            "program": "${workspaceFolder}/crawler/imooc/index.js"
+            "program": "${workspaceFolder}/crawler/mebook/index.js"
         }
     ]
 }
