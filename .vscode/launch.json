@@ -12,7 +12,8 @@
             "type": "node",
             "request": "launch",
             "name": "启动程序",
-            "program": "${workspaceFolder}/crawler/ziran/index.js"
+            "program": "${workspaceFolder}/template/pngSpider.js"
+            // "program": "${workspaceFolder}/crawler/ziran/index.js"
         }
     ]
 }
